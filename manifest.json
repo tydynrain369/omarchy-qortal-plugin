@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "qortal.node",
+  "id": "tydynrain.qortal",
   "name": "Qortal Node",
   "version": "1.0.0",
   "author": "Tydyn & Hermes",
@@ -9,7 +9,7 @@
     "bar-widget"
   ],
   "entryPoints": {
-    "barWidget": "BarWidget.vue"
+    "barWidget": "BarWidget.qml"
   },
   "barWidget": {
     "displayName": "Qortal Node",
