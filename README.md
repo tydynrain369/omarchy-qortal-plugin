@@ -4,14 +4,17 @@ A Quickshell bar widget for Omarchy that shows your Qortal blockchain node's syn
 
 ## Features
 
+All behavior below is implemented in `BarWidget.qml`:
+
 - **Color-coded Q-logo**: Red = not synced (or node down), Blue = synced, Blue ring + gold center = synced and minting
-- **Block height**: Live chain height from the admin API
+- **Block height**: Live chain height from the admin API, refreshed every 30 s
 - **Payout countdown**: Deterministic — every 1000th block is a payout block, so the countdown is `next multiple of 1000 − height`
 - **Measured ETA**: Uses the real average block time measured since the last payout block (self-correcting each refresh)
 - **Payout indicators**: `✦hunt` on the payout block itself, `✦paid` for a few blocks after a confirmed balance jump
 - **Auto-hide**: The widget vanishes when the node is down
 - **Click**: Opens the Qortal Hub GUI
 - **Right-click**: Refreshes status immediately
+- **State persistence**: Balance baseline and last payout are saved to `~/.local/state/omarchy/qortal-widget.json` so restarts never miss a payout that landed in between
 
 ## Installation
 
@@ -23,46 +26,37 @@ omarchy plugin add https://github.com/tydynrain369/omarchy-qortal-plugin.git --e
 
 ### Manual
 
+The manifest id is `tydynrain.qortal`, and the plugin directory name must match it:
+
 ```bash
-git clone https://github.com/tydynrain369/omarchy-qortal-plugin.git ~/.config/omarchy/plugins/qortal.node
+git clone https://github.com/tydynrain369/omarchy-qortal-plugin.git ~/.config/omarchy/plugins/tydynrain.qortal
 omarchy restart shell
 ```
 
 ## Configuration
 
-The widget auto-detects the Qortal data directory in this order:
+There is no config file — the widget's knobs are constants in `BarWidget.qml`:
 
-1. `$QORTAL_HOME` environment variable (if set)
-2. `~/qortal` (the default location)
-3. `~/Applications/qortal` (common custom location)
-4. `~/.config/qortal` (alternative custom location)
+| What | Where | Default |
+|---|---|---|
+| Admin API port | `BarWidget.qml` (all `curl` commands) | `http://localhost:12391` |
+| Monitored address (balance/`✦paid` detection) | `BarWidget.qml`, `balanceProc.command` | `YOUR_QORTAL_ADDRESS` |
+| Qortal Hub AppImage path (left-click action) | `BarWidget.qml`, `onPressed` | `/home/tydynrain/AppImages/qortal_hub.appimage` |
+| Refresh interval | `BarWidget.qml`, `Timer` | 30 s |
 
-The Qortal Hub AppImage path is resolved in this order:
-
-1. `$QORTAL_HUB_APPIMAGE` environment variable (if set)
-2. `~/AppImages/qortal_hub.appimage`
-3. `~/Applications/qortal-hub/qortal-hub.appimage`
-4. `~/qortal/qortal-hub.appimage`
-
-The monitoring address (for balance/payout detection) is optional. If you want balance tracking, set it in the widget's config:
-
-```bash
-echo 'QORTAL_MONITOR_ADDRESS=YOUR_QORTAL_ADDRESS' > ~/.config/omarchy/plugins/qortal.node/config
-```
-
-Without a monitoring address, the widget still shows sync/minting/payout status — it just won't flash `✦paid` on balance changes.
+Edit those lines directly and run `omarchy restart shell` to apply. Without a valid monitored address the widget still shows sync/minting/payout status — it just won't flash `✦paid` on balance changes.
 
 ## API Requirements
 
 The widget connects to the Qortal admin API on `http://localhost:12391`. Make sure:
 
 - `apiRestricted` is `false` in your `settings.json`
-- The API port is the default `12391` (changeable in settings.json if needed)
+- The API port is the default `12391` (change it in `BarWidget.qml` if yours differs)
 
 ## Removing
 
 ```bash
-omarchy plugin remove qortal.node
+omarchy plugin remove tydynrain.qortal
 ```
 
 ## License
