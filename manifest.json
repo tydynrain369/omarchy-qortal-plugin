@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "id": "tydynrain.qortal",
+  "id": "qortal.node",
   "name": "Qortal Node",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "Tydyn & Hermes",
   "description": "Qortal node sync, minting and payout status bar widget \u2014 the old KDE tray applet reborn for Omarchy Quattro",
   "kinds": [

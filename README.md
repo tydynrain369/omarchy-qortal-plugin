@@ -26,10 +26,10 @@ omarchy plugin add https://github.com/tydynrain369/omarchy-qortal-plugin.git --e
 
 ### Manual
 
-The manifest id is `tydynrain.qortal`, and the plugin directory name must match it:
+The manifest id is `qortal.node`, and the plugin directory name must match it:
 
 ```bash
-git clone https://github.com/tydynrain369/omarchy-qortal-plugin.git ~/.config/omarchy/plugins/tydynrain.qortal
+git clone https://github.com/tydynrain369/omarchy-qortal-plugin.git ~/.config/omarchy/plugins/qortal.node
 omarchy restart shell
 ```
 
@@ -41,7 +41,7 @@ There is no config file — the widget's knobs are constants in `BarWidget.qml`:
 |---|---|---|
 | Admin API port | `BarWidget.qml` (all `curl` commands) | `http://localhost:12391` |
 | Monitored address (balance/`✦paid` detection) | `BarWidget.qml`, `balanceProc.command` | `YOUR_QORTAL_ADDRESS` |
-| Qortal Hub AppImage path (left-click action) | `BarWidget.qml`, `onPressed` | `/home/tydynrain/AppImages/qortal_hub.appimage` |
+| Qortal Hub AppImage path (left-click action) | `BarWidget.qml`, `onPressed` | `$HOME/AppImages/qortal_hub.appimage` |
 | Refresh interval | `BarWidget.qml`, `Timer` | 30 s |
 
 Edit those lines directly and run `omarchy restart shell` to apply. Without a valid monitored address the widget still shows sync/minting/payout status — it just won't flash `✦paid` on balance changes.
@@ -53,10 +53,16 @@ The widget connects to the Qortal admin API on `http://localhost:12391`. Make su
 - `apiRestricted` is `false` in your `settings.json`
 - The API port is the default `12391` (change it in `BarWidget.qml` if yours differs)
 
+No local paths are hardcoded: the widget talks only to this HTTP API, so your
+Qortal core node can live anywhere (its default install location is `~/qortal`).
+The left-click opens **Qortal Hub** — the desktop UI, which is separate from the
+node itself — resolved as `$HOME/AppImages/qortal_hub.appimage`, the Omarchy
+default AppImage location.
+
 ## Removing
 
 ```bash
-omarchy plugin remove tydynrain.qortal
+omarchy plugin remove qortal.node
 ```
 
 ## License

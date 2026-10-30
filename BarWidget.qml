@@ -14,7 +14,7 @@ import qs.Ui
 // confirmed balance jump. Click opens Qortal Hub; right-click refreshes.
 BarWidget {
   id: root
-  moduleName: "tydynrain.qortal"
+  moduleName: "qortal.node"
 
   // ---------- state ----------
   property var status: null
@@ -177,7 +177,7 @@ BarWidget {
     hasVisualContent: true
     onPressed: function(b) {
       if (b === Qt.RightButton) root.refresh()
-      else if (b === Qt.LeftButton) Quickshell.execDetached(["sh", "-c", "env DESKTOPINTEGRATION=1 /home/tydynrain/AppImages/qortal_hub.appimage --no-sandbox"])
+      else if (b === Qt.LeftButton) Quickshell.execDetached(["sh", "-c", "env DESKTOPINTEGRATION=1 \"$HOME/AppImages/qortal_hub.appimage\" --no-sandbox"])
     }
 
     RowLayout {
