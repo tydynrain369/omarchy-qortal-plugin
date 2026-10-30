@@ -11,7 +11,8 @@ import qs.Ui
 // payout height is the next multiple of 1000. ETA uses the MEASURED average
 // block time since the last payout block (self-correcting each refresh).
 // "✦hunt" on the payout block itself; "✦paid" for a few blocks after a
-// confirmed balance jump. Click opens Qortal Hub; right-click refreshes.
+// confirmed balance jump. Left-click opens your Qortal Hub (hubPath);
+// right-click refreshes.
 BarWidget {
   id: root
   moduleName: "qortal.node"
@@ -24,6 +25,10 @@ BarWidget {
   property real height_: -1
   property real blockSeconds: 72          // measured average; refined each refresh
   property real anchorBlock: -1           // payout block used for the measurement
+
+  // Left-click target: your own Qortal Hub executable. Defaults to the Omarchy
+  // AppImage convention; point it anywhere (or at a launcher on PATH).
+  readonly property string hubPath: Quickshell.env("HOME") + "/AppImages/qortal_hub.appimage"
 
   readonly property bool nodeUp: status !== null
   readonly property bool synced: nodeUp && status.isSynchronizing === false && status.syncPercent >= 100
@@ -177,7 +182,7 @@ BarWidget {
     hasVisualContent: true
     onPressed: function(b) {
       if (b === Qt.RightButton) root.refresh()
-      else if (b === Qt.LeftButton) Quickshell.execDetached(["sh", "-c", "env DESKTOPINTEGRATION=1 \"$HOME/AppImages/qortal_hub.appimage\" --no-sandbox"])
+      else if (b === Qt.LeftButton) Quickshell.execDetached(["sh", "-c", "env DESKTOPINTEGRATION=1 \"" + root.hubPath + "\" --no-sandbox"])
     }
 
     RowLayout {
