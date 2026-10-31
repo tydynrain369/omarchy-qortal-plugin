@@ -1,4 +1,4 @@
-# Qortal Node — Omarchy Bar Widget
+# Qortal Minting-Node Status — Omarchy Bar Widget
 
 A Quickshell bar widget for Omarchy that shows your Qortal blockchain node's sync, minting, and payout status. The old KDE tray applet, reborn for Omarchy.
 
@@ -28,10 +28,10 @@ This is the command the Omarchy plugin marketplace shows for a listing.
 
 ### Manual
 
-The manifest id is `qortal.node`, and the plugin directory name must match it:
+The manifest id is `io.github.tydynrain369.qortal-minting-node-status`, and the plugin directory name must match it:
 
 ```bash
-git clone https://github.com/tydynrain369/omarchy-qortal-plugin.git ~/.config/omarchy/plugins/qortal.node
+git clone https://github.com/tydynrain369/omarchy-qortal-plugin.git ~/.config/omarchy/plugins/io.github.tydynrain369.qortal-minting-node-status
 omarchy restart shell
 ```
 
@@ -70,7 +70,7 @@ node itself — from the path in the `hubPath` constant.
 ## Removing
 
 ```bash
-omarchy plugin remove qortal.node
+omarchy plugin remove io.github.tydynrain369.qortal-minting-node-status
 ```
 
 ## License

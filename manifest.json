@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "id": "qortal.node",
-  "name": "Qortal Node",
-  "version": "1.1.1",
+  "id": "io.github.tydynrain369.qortal-minting-node-status",
+  "name": "Qortal Minting-Node Status",
+  "version": "1.1.2",
   "author": "Tydyn & Hermes",
   "description": "Qortal node sync, minting and payout status bar widget \u2014 the old KDE tray applet reborn for Omarchy Quattro",
   "kinds": [
@@ -12,7 +12,7 @@
     "barWidget": "BarWidget.qml"
   },
   "barWidget": {
-    "displayName": "Qortal Node",
+    "displayName": "Qortal Minting-Node Status",
     "description": "Sync, minting and payout status with color-coded Qortal logo",
     "category": "Network",
     "allowMultiple": false

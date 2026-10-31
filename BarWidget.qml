@@ -15,7 +15,7 @@ import qs.Ui
 // right-click refreshes.
 BarWidget {
   id: root
-  moduleName: "qortal.node"
+  moduleName: "io.github.tydynrain369.qortal-minting-node-status"
 
   // ---------- state ----------
   property var status: null
