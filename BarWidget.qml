@@ -186,7 +186,9 @@ BarWidget {
     hasVisualContent: true
     onPressed: function(b) {
       if (b === Qt.RightButton) root.refresh()
-      else if (b === Qt.LeftButton) Quickshell.execDetached(["sh", "-c", "env DESKTOPINTEGRATION=1 \"" + root.hubPath + "\" --no-sandbox"])
+      // Launch Hub with its OWN sandbox intact: never add --no-sandbox here, it
+      // disables the renderer sandbox for every Hub process and webview.
+      else if (b === Qt.LeftButton) Quickshell.execDetached(["sh", "-c", "env DESKTOPINTEGRATION=1 \"" + root.hubPath + "\""])
     }
 
     RowLayout {
