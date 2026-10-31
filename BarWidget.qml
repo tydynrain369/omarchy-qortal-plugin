@@ -13,6 +13,11 @@ import qs.Ui
 // "✦hunt" on the payout block itself; "✦paid" for a few blocks after a
 // confirmed balance jump. Left-click opens your Qortal Hub (hubPath);
 // right-click refreshes.
+//
+// Zero-config by default: the node's admin API port is read from the node's
+// own settings.json and the monitored (minting) address from the node's own
+// /admin/mintingaccounts endpoint. Both fall back sensibly, so the widget
+// works out of the box against a standard local Qortal Core.
 BarWidget {
   id: root
   moduleName: "io.github.tydynrain369.qortal-minting-node-status"
@@ -30,9 +35,19 @@ BarWidget {
   // AppImage convention; point it anywhere (or at a launcher on PATH).
   readonly property string hubPath: Quickshell.env("HOME") + "/AppImages/qortal_hub.appimage"
 
-  // Optional: YOUR OWN Qortal address. Leave empty to disable the balance check
-  // (the ✦paid indicator) — every other feature works without it.
-  readonly property string monitoredAddress: ""
+  // ---------- auto-discovery (no config needed in the common case) ----------
+  // Admin API port. Qortal writes only NON-default keys to settings.json, so a
+  // missing "apiPort" means the default 12391. Read at startup (see settingsProc).
+  property int nodePort: 12391
+  readonly property string apiBase: "http://localhost:" + nodePort
+  // Where the node core lives (only used to read settings.json).
+  readonly property string settingsPath: Quickshell.env("HOME") + "/qortal/settings.json"
+
+  // Monitored address (balance + the ✦paid indicator). Auto-filled from the
+  // node's minting account; leave fallbackAddress empty for full auto-detection,
+  // or set it to YOUR OWN Qortal address to override (e.g. watch another wallet).
+  property string monitoredAddress: ""
+  readonly property string fallbackAddress: ""
 
   readonly property bool nodeUp: status !== null
   readonly property bool synced: nodeUp && status.isSynchronizing === false && status.syncPercent >= 100
@@ -60,6 +75,32 @@ BarWidget {
   function refresh() {
     statusProc.running = true
     if (monitoredAddress !== "") balanceProc.running = true
+    else mintAcctProc.running = true          // keep probing until discovered
+  }
+
+  // Parse the node's settings.json for a non-default apiPort, then discover the
+  // minting account. Robust to a missing/invalid file (port stays 12391).
+  function applySettings(txt) {
+    try {
+      var s = JSON.parse(txt)
+      if (s && s.apiPort > 0 && s.apiPort < 65536) root.nodePort = s.apiPort
+    } catch (e) {}
+    mintAcctProc.running = true
+  }
+
+  // The node reports its OWN minting account — no key, no config. An empty
+  // answer (no minting account configured) falls back to fallbackAddress.
+  function applyMintingAccounts(txt) {
+    try {
+      var a = JSON.parse(txt)
+      if (a && a.length > 0) {
+        var m = a[0].recipientAccount || a[0].mintingAccount || ""
+        if (m !== "") root.monitoredAddress = m
+      }
+    } catch (e) {}
+    if (root.monitoredAddress === "" && fallbackAddress !== "")
+      root.monitoredAddress = fallbackAddress
+    if (root.monitoredAddress !== "") balanceProc.running = true
   }
 
   // 2026-10-21: this Quickshell build's FileView has NO writeText() — the
@@ -95,7 +136,8 @@ BarWidget {
   // Appear only while the node answers — the slot vanishes when Qortal is down.
   visible: root.nodeUp
 
-  Component.onCompleted: refresh()
+  // Discover port + minting address, then start polling.
+  Component.onCompleted: { settingsProc.running = true; refresh() }
 
   Timer { interval: 30000; running: true; repeat: true; onTriggered: root.refresh() }
 
@@ -110,9 +152,25 @@ BarWidget {
   // State writer (see saveState) — FileView is read-only in this build.
   Process { id: saveProc }
 
+  // Read the node's settings.json for a non-default API port. Always fires
+  // onStreamFinished (even on a missing file), so discovery never stalls.
+  Process {
+    id: settingsProc
+    command: ["sh", "-c", "cat \"" + root.settingsPath + "\" 2>/dev/null || true"]
+    stdout: StdioCollector { onStreamFinished: root.applySettings(text) }
+  }
+
+  // Discover the minting account straight from the node — no API key required
+  // when apiRestricted is false.
+  Process {
+    id: mintAcctProc
+    command: ["curl", "-s", "-m", "4", root.apiBase + "/admin/mintingaccounts"]
+    stdout: StdioCollector { onStreamFinished: root.applyMintingAccounts(text) }
+  }
+
   Process {
     id: statusProc
-    command: ["curl", "-s", "-m", "4", "http://localhost:12391/admin/status"]
+    command: ["curl", "-s", "-m", "4", root.apiBase + "/admin/status"]
     stdout: StdioCollector {
       onStreamFinished: {
         try {
@@ -123,7 +181,7 @@ BarWidget {
           if (root.height_ === P && P > 0) P -= 1000
           if (P > 0) {
             root.anchorBlock = P
-            payoutProc.command = ["curl", "-s", "-m", "4", "http://localhost:12391/blocks/byheight/" + P]
+            payoutProc.command = ["curl", "-s", "-m", "4", root.apiBase + "/blocks/byheight/" + P]
             payoutProc.running = true
           }
         } catch (e) { root.status = null }
@@ -151,7 +209,7 @@ BarWidget {
 
   Process {
     id: balanceProc
-    command: ["curl", "-s", "-m", "4", "http://localhost:12391/addresses/balance/" + monitoredAddress]
+    command: ["curl", "-s", "-m", "4", root.apiBase + "/addresses/balance/" + root.monitoredAddress]
     stdout: StdioCollector {
       onStreamFinished: {
         var b = parseFloat(String(text).trim())
