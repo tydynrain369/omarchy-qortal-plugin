@@ -30,6 +30,10 @@ BarWidget {
   // AppImage convention; point it anywhere (or at a launcher on PATH).
   readonly property string hubPath: Quickshell.env("HOME") + "/AppImages/qortal_hub.appimage"
 
+  // Optional: YOUR OWN Qortal address. Leave empty to disable the balance check
+  // (the ✦paid indicator) — every other feature works without it.
+  readonly property string monitoredAddress: ""
+
   readonly property bool nodeUp: status !== null
   readonly property bool synced: nodeUp && status.isSynchronizing === false && status.syncPercent >= 100
   readonly property bool minting: nodeUp && status.isMintingPossible === true
@@ -55,7 +59,7 @@ BarWidget {
 
   function refresh() {
     statusProc.running = true
-    balanceProc.running = true
+    if (monitoredAddress !== "") balanceProc.running = true
   }
 
   // 2026-10-21: this Quickshell build's FileView has NO writeText() — the
@@ -147,7 +151,7 @@ BarWidget {
 
   Process {
     id: balanceProc
-    command: ["curl", "-s", "-m", "4", "http://localhost:12391/addresses/balance/YOUR_QORTAL_ADDRESS"]
+    command: ["curl", "-s", "-m", "4", "http://localhost:12391/addresses/balance/" + monitoredAddress]
     stdout: StdioCollector {
       onStreamFinished: {
         var b = parseFloat(String(text).trim())

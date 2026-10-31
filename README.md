@@ -2,6 +2,8 @@
 
 A Quickshell bar widget for Omarchy that shows your Qortal blockchain node's sync, minting, and payout status. The old KDE tray applet, reborn for Omarchy.
 
+![Qortal Minting-Node Status in the Omarchy bar](preview.png)
+
 ## Features
 
 All behavior below is implemented in `BarWidget.qml`:
@@ -10,7 +12,7 @@ All behavior below is implemented in `BarWidget.qml`:
 - **Block height**: Live chain height from the admin API, refreshed every 30 s
 - **Payout countdown**: Deterministic — every 1000th block is a payout block, so the countdown is `next multiple of 1000 − height`
 - **Measured ETA**: Uses the real average block time measured since the last payout block (self-correcting each refresh)
-- **Payout indicators**: `✦hunt` on the payout block itself, `✦paid` for a few blocks after a confirmed balance jump
+- **Payout indicators**: `✦hunt` on the payout block itself, `✦paid` for a few blocks after a confirmed balance jump (needs `monitoredAddress` set)
 - **Auto-hide**: The widget vanishes when the node is down
 - **Left-click**: Opens your Qortal Hub install (see `hubPath` below)
 - **Right-click**: Refreshes status immediately
@@ -48,12 +50,15 @@ There is no config file — the widget's knobs are constants in `BarWidget.qml`:
 | What | Where | Default |
 |---|---|---|
 | Admin API port | `BarWidget.qml` (all `curl` commands) | `http://localhost:12391` |
-| Monitored address (balance/`✦paid` detection) | `BarWidget.qml`, `balanceProc.command` | `YOUR_QORTAL_ADDRESS` |
+| Monitored address (balance/`✦paid` detection) | `BarWidget.qml`, `monitoredAddress` | empty — set it to **your own** Qortal address |
 | Qortal node core location (informational — the widget uses the HTTP API only) | — | `~/qortal` (Qortal's default) |
 | Qortal Hub launcher (left-click) | `BarWidget.qml`, `hubPath` | Omarchy AppImage convention |
 | Refresh interval | `BarWidget.qml`, `Timer` | 30 s |
 
-Edit those lines directly and run `omarchy restart shell` to apply. Without a valid monitored address the widget still shows sync/minting/payout status — it just won't flash `✦paid` on balance changes.
+Edit those lines directly and run `omarchy restart shell` to apply. `monitoredAddress`
+ships **empty** — put your own Qortal address there to enable `✦paid` balance-change
+detection. Without it the widget still shows sync, height, minting state and the
+payout countdown; it just never flashes `✦paid`.
 
 ## API Requirements
 

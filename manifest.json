@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "io.github.tydynrain369.qortal-minting-node-status",
   "name": "Qortal Minting-Node Status",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "author": "Tydyn & Hermes",
   "description": "Qortal node sync, minting and payout status bar widget \u2014 the old KDE tray applet reborn for Omarchy Quattro",
   "kinds": [
