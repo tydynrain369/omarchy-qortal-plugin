@@ -6,26 +6,16 @@ A Quickshell bar widget for Omarchy that shows your Qortal blockchain node's syn
 
 ## Requirements
 
-This widget is a **window onto a Qortal Core node you run yourself** — it has no
-node of its own. Two things must be true before it shows anything:
+This widget is a **window onto a Qortal Core node you run yourself** — it has no node of its own. Two things must be true before it shows anything:
 
-1. **Qortal Core must be installed and running** on the same machine, and fully
-   synced. Without a local node answering its admin API, the widget hides itself
-   (that is its "node down" state).
-2. **A minting account must be added to that node for the *minting* indicators
-   to mean anything.** Sync, block height and the payout countdown work as soon
-   as the node is synced; the gold "minting" center and the `✦paid` status need a
-   minting account registered on the node. (The widget reads that account from
-   the node automatically — see Configuration.)
+1. **Qortal Core must be installed and running** on the same machine, and fully synced. Without a local node answering its admin API, the widget hides itself (that is its "node down" state).
+2. **A minting account must be added to that node for the *minting* indicators to mean anything.** Sync, block height and the payout countdown work as soon as the node is synced; the gold "minting" center and the `✦paid` status need a minting account registered on the node. (The widget reads that account from the node automatically — see Configuration.)
 
-Because it needs a local node, this plugin has **no one-command install**. The
-Omarchy Plugin Marketplace therefore lists it as **Manual setup**. Install it by
-hand, below.
+Because it needs a local node, this plugin has **no one-command install**. The Omarchy Plugin Marketplace therefore lists it as **Manual setup**. Install it by hand, below.
 
 ## Installation
 
-The manifest id is `io.github.tydynrain369.qortal-minting-node-status`, and the
-plugin directory name must match it:
+The manifest id is `io.github.tydynrain369.qortal-minting-node-status`, and the plugin directory name must match it:
 
 ```bash
 git clone https://github.com/tydynrain369/omarchy-qortal-plugin.git ~/.config/omarchy/plugins/io.github.tydynrain369.qortal-minting-node-status
@@ -34,21 +24,18 @@ omarchy restart shell
 
 ## Configuration
 
-**Usually none.** The widget auto-discovers what it needs from the local node:
+**Zero config in the common case.** The widget auto-discovers everything from the running node:
 
-| What | Where it comes from | Fallback |
+| What | How it's discovered | Fallback |
 |---|---|---|
-| Admin API port | `apiPort` in the node's `~/qortal/settings.json` | `12391` (Qortal's default) |
-| Monitored (minting) address | the node's own `/admin/mintingaccounts` endpoint | `fallbackAddress` constant, else none |
+| Admin API port | Reads `apiPort` from the node's `~/qortal/settings.json` (file read at startup) | `12391` (Qortal's default — used when key is absent) |
+| Monitored (minting) address | Queries the node's `/admin/mintingaccounts` endpoint (no API key needed when `apiRestricted: false`) | `fallbackAddress` constant in `BarWidget.qml`, else none |
 
-Qortal writes only *non-default* keys to `settings.json`, so a missing `apiPort`
-simply means the default `12391`. The monitored address is taken from the node's
-own minting configuration — **you do not normally set it yourself**. If you want
-to watch a *different* address (e.g. a non-minting wallet), set `fallbackAddress`
-in `BarWidget.qml` to your Qortal address; it is used only when the node reports
-no minting account.
+- Qortal writes only *non-default* keys to `settings.json`, so a missing `apiPort` simply means the default `12391`.
+- The monitored address comes from the node's own minting configuration — **you do not normally set it yourself**.
+- To watch a *different* address (e.g. a non-minting wallet), set `fallbackAddress` in `BarWidget.qml` to your Qortal address; it is used only when the node reports no minting account.
 
-The remaining knobs are constants in `BarWidget.qml`:
+**Constants you may edit in `BarWidget.qml`:**
 
 | What | Constant | Default |
 |---|---|---|
@@ -56,11 +43,7 @@ The remaining knobs are constants in `BarWidget.qml`:
 | Override watched address | `fallbackAddress` | empty (fully automatic) |
 | Refresh interval | `Timer` | 30 s |
 
-Edit those and run `omarchy restart shell` to apply. The widget talks **only** to
-the node's HTTP API and never reads the node's files, so your Qortal **node
-core** can live anywhere (its default install location is `~/qortal`). The
-left-click opens **Qortal Hub**, the desktop UI, which is a separate program from
-the node.
+Edit those and run `omarchy restart shell` to apply. The widget reads the node's `settings.json` **once at startup** for the port, then talks **only** to the HTTP admin API thereafter. The node core can live anywhere (default: `~/qortal`); the left-click opens **Qortal Hub**, a separate desktop UI.
 
 ### Features
 
@@ -78,8 +61,7 @@ All behavior below is implemented in `BarWidget.qml`:
 
 ## API Requirements
 
-The widget connects to the Qortal **admin** API on `http://localhost:<apiPort>`
-(12391 by default). Make sure:
+The widget connects to the Qortal **admin** API on `http://localhost:<apiPort>` (12391 by default). Make sure:
 
 - `apiRestricted` is `false` in your `settings.json` (the default)
 - Your `apiPort`, if changed from `12391`, is the value in `settings.json`
